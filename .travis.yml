@@ -1,6 +1,23 @@
+sudo: required
+
+services:
+  - docker
+
 language: java
 jdk: oraclejdk8
 
 notifications:
   email:
     - maxsyachin@gmail.com
+
+env:
+  global:
+    - COMMIT=${TRAVIS_COMMIT::7}
+
+after_success:
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH ; fi`
+  - export SMALLER=finnetrolle/smallerex1
+  - docker build -t $SMALLER:$COMMIT
+  - docker tag $SMALLER:$COMMIT $SMALLER:$TAG
+  - docker push $SMALLER
